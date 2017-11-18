@@ -1,6 +1,8 @@
 package com.suchef.suchef;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -26,6 +28,7 @@ public class Cadastro extends AppCompatActivity {
 
     EditText editNome, editEmail, editSenha, editRepitaSenha, editCpf;
     Button btnCadatrar;
+    SharedPreferences sharedPref;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +39,14 @@ public class Cadastro extends AppCompatActivity {
         editEmail = (EditText)findViewById(R.id.edtEmail);
         editSenha = (EditText) findViewById(R.id.edtSenha);
         editRepitaSenha = (EditText)findViewById(R.id.edtRepitaSenha);
+
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+
+        String token = sharedPref.getString("api_token", "");
+
+        if (!token.isEmpty()) {
+            // pula!
+        }
 
 
         btnCadatrar = (Button)findViewById(R.id.button);
@@ -102,7 +113,20 @@ public class Cadastro extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
-                        dialog.hide();
+                        try {
+                            String nome = response.getString("nome");
+                            String token = response.getString("token_api");
+
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("nome", nome);
+                            editor.putString("token_api", token);
+                            editor.commit();
+
+                            System.out.println("Starting another activity....");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override
