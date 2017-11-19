@@ -35,21 +35,24 @@ public class Cadastro extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
+        setTitle("Cadastro");
+
         editNome = (EditText)findViewById(R.id.edtNome);
         editCpf = (EditText)findViewById(R.id.edtCpf);
         editEmail = (EditText)findViewById(R.id.edtEmail);
         editSenha = (EditText) findViewById(R.id.edtSenha);
         editRepitaSenha = (EditText)findViewById(R.id.edtRepitaSenha);
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = this.getSharedPreferences(this.getString(R.string.app_name), Context.MODE_PRIVATE);
 
-        String token = sharedPref.getString("api_token", "");
+        String token = sharedPref.getString("token_api", "");
 
         if (!token.isEmpty()) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
             startActivity(intent);
+            return;
         }
 
 

@@ -34,6 +34,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        setTitle("Login");
+
         btnLogin = (Button) findViewById(R.id.loginCta);
         btnCadastro = (Button) findViewById(R.id.loginCadastro);
         edtEmail = (EditText) findViewById(R.id.loginEmail);
@@ -45,12 +47,15 @@ public class LoginActivity extends AppCompatActivity {
         progress.setIndeterminate(true);
         progress.setCanceledOnTouchOutside(false);
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = this.getSharedPreferences(this.getString(R.string.app_name), Context.MODE_PRIVATE);
 
         String token = sharedPref.getString("token_api", "");
 
         if (!token.isEmpty()) {
-            startActivity(new Intent(this, MainActivity.class));
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
             return;
         }
 
