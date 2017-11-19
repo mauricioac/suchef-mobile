@@ -2,6 +2,7 @@ package com.suchef.suchef;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,7 +28,7 @@ import java.util.HashMap;
 public class Cadastro extends AppCompatActivity {
 
     EditText editNome, editEmail, editSenha, editRepitaSenha, editCpf;
-    Button btnCadatrar;
+    Button btnCadatrar, btnGotoLogin;
     SharedPreferences sharedPref;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +46,16 @@ public class Cadastro extends AppCompatActivity {
         String token = sharedPref.getString("api_token", "");
 
         if (!token.isEmpty()) {
-            // pula!
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
         }
 
 
         btnCadatrar = (Button)findViewById(R.id.button);
+        btnGotoLogin = (Button) findViewById(R.id.btnGotoLogin);
+
         final RequestQueue queue = Volley.newRequestQueue(this);
 
         final ProgressDialog dialog = new ProgressDialog(this); // this = YourActivity
@@ -112,33 +118,36 @@ public class Cadastro extends AppCompatActivity {
                 JsonObjectRequest request = new JsonObjectRequest(url, data, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        try {
-                            String nome = response.getString("nome");
-                            String token = response.getString("token_api");
+                    System.out.println(response.toString());
+                    try {
+                        String nome = response.getString("nome");
+                        String token = response.getString("token_api");
 
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString("nome", nome);
-                            editor.putString("token_api", token);
-                            editor.commit();
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("nome", nome);
+                        editor.putString("token_api", token);
+                        editor.commit();
 
-                            System.out.println("Starting another activity....");
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        startActivity(intent);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        NetworkResponse networkResponse = error.networkResponse;
+                    NetworkResponse networkResponse = error.networkResponse;
 
-                        btnCadatrar.setEnabled(true);
-                        dialog.hide();
+                    btnCadatrar.setEnabled(true);
+                    dialog.hide();
 
-                        if (networkResponse != null && networkResponse.statusCode == 422) {
+                    if (networkResponse != null && networkResponse.statusCode == 422) {
 
-                        }
+                    }
                     }
                 });
 
@@ -146,6 +155,14 @@ public class Cadastro extends AppCompatActivity {
             }
         });
 
+        btnGotoLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
+                startActivity(intent);
+            }
+        });
     }
 }
