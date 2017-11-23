@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -101,7 +103,18 @@ public class MainActivity extends AppCompatActivity {
                 return headers;
             }
         };
-
+        list.setClickable(true);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object o = list.getItemAtPosition(position);
+                HashMap<String, String> a = (HashMap<String, String>) o;
+                Intent intent = new Intent(getApplicationContext(), Restaurante.class);
+                intent.putExtra("id", a.get("id"));
+                startActivity(intent);
+                return;
+            }
+        });
         queue.add(request);
     }
 }
