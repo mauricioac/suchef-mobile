@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,12 +31,15 @@ public class LoginActivity extends AppCompatActivity {
     EditText edtEmail, edtSenha;
     ProgressDialog progress;
     SharedPreferences sharedPref;
+    ConnectivityManager cm;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         setTitle("Login");
+
+        cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         btnLogin = (Button) findViewById(R.id.loginCta);
         btnCadastro = (Button) findViewById(R.id.loginCadastro);
@@ -65,6 +70,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean valido = true;
+
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                boolean isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+
+                if (!isConnected) {
+                    Toast.makeText(getApplicationContext(), "Você está offline!", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 if(edtEmail.getText().toString().isEmpty()){
                     edtEmail.setError("Email vazio");

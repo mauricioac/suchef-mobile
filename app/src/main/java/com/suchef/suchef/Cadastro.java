@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -31,11 +33,15 @@ public class Cadastro extends AppCompatActivity {
     Button btnCadatrar, btnGotoLogin;
     SharedPreferences sharedPref;
 
+    ConnectivityManager cm;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
 
         setTitle("Cadastro");
+
+        cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         editNome = (EditText)findViewById(R.id.edtNome);
         editCpf = (EditText)findViewById(R.id.edtCpf);
@@ -72,6 +78,16 @@ public class Cadastro extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean valido = true;
+
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                boolean isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+
+                if (!isConnected) {
+                    Toast.makeText(getApplicationContext(), "Você está offline!", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
 
                 if(editNome.getText().toString().isEmpty()){
                     editNome.setError("Nome Completo Vazio!");
