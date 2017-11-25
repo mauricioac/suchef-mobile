@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 Object o = list.getItemAtPosition(position);
                 HashMap<String, String> a = (HashMap<String, String>) o;
                 Intent intent = new Intent(getApplicationContext(), Restaurante.class);
-                intent.putExtra("id", a.get("id"));
+                intent.putExtra("filial", a);
                 startActivity(intent);
                 return;
             }

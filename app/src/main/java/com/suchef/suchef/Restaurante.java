@@ -35,17 +35,19 @@ public class Restaurante extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    HashMap<String, String> filial;
+    TabProdutos tabProdutos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_restaurante);
 
         sharedPref = this.getSharedPreferences(this.getString(R.string.app_name), Context.MODE_PRIVATE);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        filial = (HashMap<String, String>) getIntent().getSerializableExtra("filial");
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -53,10 +55,12 @@ public class Restaurante extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        String id = getIntent().getStringExtra("id");
+        setTitle(filial.get("nome"));
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://suchef-web.herokuapp.com/api/filiais/" + id + "/produtos";
+        String url = "https://suchef-web.herokuapp.com/api/filiais/" + filial.get("id") + "/produtos";
+
+        System.out.println(url);
 
         String token = sharedPref.getString("token_api", "");
 
@@ -64,25 +68,25 @@ public class Restaurante extends AppCompatActivity {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    List<Map<String,String>> produtos = new ArrayList<Map<String,String>>();
+                    List<HashMap<String,String>> produtos = new ArrayList<>();
 
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject row = response.getJSONObject(i);
 
-                        HashMap<String, String> produto = new HashMap<String, String>();
+                        HashMap<String, String> produto = new HashMap<>();
                         produto.put("id", row.getString("id"));
                         produto.put("nome", row.getString("nome"));
                         produto.put("ref", row.getString("ref"));
                         produto.put("descricao", row.getString("descricao"));
                         produto.put("imagem", row.getString("imagem"));
                         produto.put("preco", row.getString("preco"));
+
+                        produtos.add(produto);
                     }
 
-//                    ListAdapter adapter = new SimpleAdapter(MainActivity.this, restaurantes, R.layout.item_restaurante,
-//                            new String[] { "nome" },
-//                            new int[] { R.id.nome_restaurante });
-//
-//                    list.setAdapter(adapter);
+                    System.out.println(produtos);
+
+                    tabProdutos.atualizaProdutos(produtos);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -103,12 +107,16 @@ public class Restaurante extends AppCompatActivity {
                 return headers;
             }
         };
+
+        queue.add(request);
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        tabProdutos = new TabProdutos();
+
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new TabRestaurante(), "Informações");
-        adapter.addFragment(new TabProdutos(), "Produtos");
+        adapter.addFragment(TabRestaurante.newInstance(filial), "Informações");
+        adapter.addFragment(tabProdutos, "Produtos");
         viewPager.setAdapter(adapter);
     }
 
