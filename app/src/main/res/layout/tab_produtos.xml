@@ -9,14 +9,16 @@
         android:id="@+id/listaProdutos"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:elevation="3dp"
         android:listSelector="@android:color/transparent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent">
 
     </ListView>
 
@@ -25,30 +27,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="24dp"
         android:clickable="true"
         android:src="@drawable/ic_shopping_basket_black_24dp"
-        app:layout_anchorGravity="right|end"
-        app:layout_constraintBottom_toBottomOf="@+id/listaProdutos"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginRight="24dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="24dp" />
 
     <TextView
         android:id="@+id/fabCounter"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginBottom="32dp"
-        android:layout_marginEnd="8dp"
         android:background="@drawable/circle"
         android:clickable="false"
-        android:elegantTextHeight="false"
+        android:elegantTextHeight="true"
         android:elevation="11dp"
+        android:paddingTop="1dp"
         android:text="0"
         android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="10dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@+id/listaProdutos"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginRight="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="52dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="16dp" />
 
 </android.support.constraint.ConstraintLayout>

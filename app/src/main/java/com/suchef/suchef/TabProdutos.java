@@ -98,7 +98,7 @@ public class TabProdutos extends Fragment implements QuantidadeObserver {
         } else {
             fab.show();
             fabCounter.setVisibility(View.VISIBLE);
-            fabCounter.setText(pedido.numeroItens());
+            fabCounter.setText(String.valueOf(pedido.numeroItens()));
         }
     }
 }
