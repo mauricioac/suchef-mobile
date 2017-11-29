@@ -18,17 +18,20 @@ import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
-public class TabProdutos extends Fragment {
+public class TabProdutos extends Fragment implements QuantidadeObserver {
 
     Button finalizarPedido;
     ListView listaProdutos;
+    Pedido pedido;
+    ArrayList<Produto> produtos;
 
     public TabProdutos() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -37,13 +40,13 @@ public class TabProdutos extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.tab_produtos, container, false);
 
-//        finalizarPedido = (Button) v.findViewById(R.id.finalizarPedido);
         listaProdutos = (ListView) v.findViewById(R.id.listaProdutos);
+
+        pedido = new Pedido();
+        produtos = new ArrayList<>();
 
         return v;
     }
@@ -52,40 +55,95 @@ public class TabProdutos extends Fragment {
 
         for (HashMap<String, String> produto : produtos) {
             produto.put("preco_formatado", "R$ " + produto.get("preco"));
+
+            Produto p = new Produto(
+                    Integer.parseInt(produto.get("id")),
+                    Float.parseFloat(produto.get("preco")),
+                    produto.get("nome"),
+                    produto.get("descricao"),
+                    Integer.parseInt(produto.get("filiais_id") == null ? "0" : produto.get("filiais_id"))
+            );
+
+            this.produtos.add(p);
         }
 
-        ListAdapter adapter = new ProdutosListAdapter(getActivity().getFragmentManager(), getActivity().getApplicationContext(), produtos, R.layout.item_produto,
+        ProdutosListAdapter adapter = new ProdutosListAdapter(getActivity().getFragmentManager(), getActivity().getApplicationContext(), produtos, R.layout.item_produto,
                 new String[] { "preco_formatado", "nome", "descricao" },
                 new int[] { R.id.precoProduto, R.id.nomeProduto, R.id.descricaoProduto });
+
+        adapter.attachObserver(this);
 
 
         listaProdutos.setClickable(false);
         listaProdutos.setAdapter(adapter);
     }
 
+    @Override
+    public void onUpdate(int position, int quantidade) {
+        System.out.println(produtos);
+        System.out.println(produtos.size());
+        System.out.println(position);
+        Produto p = produtos.get(position);
+
+        pedido.atualizaProduto(p, quantidade);
+        System.out.println(position + " " + p.getNome() + ": " + quantidade);
+    }
 }
 
 class ProdutosListAdapter extends SimpleAdapter {
     FragmentManager fm;
+    List<QuantidadeObserver> observers;
 
     public ProdutosListAdapter(FragmentManager manager, Context context, java.util.List<? extends java.util.Map<java.lang.String,?>> data, @LayoutRes int layout_id, String []keys, @IdRes int []ids) {
         super(context, data, layout_id, keys, ids);
 
         this.fm = manager;
+        observers = new ArrayList<>();
     }
 
-    @Override
+    public void attachObserver(QuantidadeObserver observer) {
+        this.observers.add(observer);
+    }
+
+    public void notifyObservers(Integer position, Integer quantidade) {
+        for (QuantidadeObserver o : observers) {
+            o.onUpdate(position, quantidade);
+        }
+    }
+
+        @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = super.getView(position, convertView, parent);
 
         final EditText quantidade = (EditText) v.findViewById(R.id.txtQuantidade);
         quantidade.setFocusable(false);
 
+        Method notify = null;
+        try {
+
+            notify = this.getClass().getMethod("notifyObservers", Integer.class, Integer.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        final Method notifyP = notify;
+
+        final Object t = this;
+
+        final int pos = position;
+
         final NumberPickerDialog np = new NumberPickerDialog();
         np.setValueChangeListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int i, int i1) {
                 quantidade.setText(String.valueOf(i));
+
+                try {
+                    notifyP.invoke(t, pos, i);
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
         });
 
