@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.app.FragmentManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,10 +26,11 @@ import java.util.List;
 
 public class TabProdutos extends Fragment implements QuantidadeObserver {
 
-    Button finalizarPedido;
+    FloatingActionButton fab;
     ListView listaProdutos;
     Pedido pedido;
     ArrayList<Produto> produtos;
+    TextView fabCounter;
 
     public TabProdutos() {
 
@@ -47,6 +49,12 @@ public class TabProdutos extends Fragment implements QuantidadeObserver {
 
         pedido = new Pedido();
         produtos = new ArrayList<>();
+
+        fab = (FloatingActionButton) v.findViewById(R.id.cartFAB);
+        fab.hide();
+
+        fabCounter = (TextView) v.findViewById(R.id.fabCounter);
+        fabCounter.setVisibility(View.INVISIBLE);
 
         return v;
     }
@@ -80,13 +88,18 @@ public class TabProdutos extends Fragment implements QuantidadeObserver {
 
     @Override
     public void onUpdate(int position, int quantidade) {
-        System.out.println(produtos);
-        System.out.println(produtos.size());
-        System.out.println(position);
         Produto p = produtos.get(position);
 
         pedido.atualizaProduto(p, quantidade);
-        System.out.println(position + " " + p.getNome() + ": " + quantidade);
+
+        if (pedido.vazio()) {
+            fab.hide();
+            fabCounter.setVisibility(View.INVISIBLE);
+        } else {
+            fab.show();
+            fabCounter.setVisibility(View.VISIBLE);
+            fabCounter.setText(pedido.numeroItens());
+        }
     }
 }
 
@@ -118,6 +131,7 @@ class ProdutosListAdapter extends SimpleAdapter {
         final EditText quantidade = (EditText) v.findViewById(R.id.txtQuantidade);
         quantidade.setFocusable(false);
 
+        // ಠ_ಠ
         Method notify = null;
         try {
 
@@ -125,7 +139,6 @@ class ProdutosListAdapter extends SimpleAdapter {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-
         final Method notifyP = notify;
 
         final Object t = this;

@@ -35,4 +35,27 @@ public class Pedido {
 
         return subtotal;
     }
+
+    public boolean vazio() {
+        boolean vazio = true;
+
+        for (Produto k : pedido.keySet()) {
+            if (pedido.get(k) > 0) {
+                vazio = false;
+            }
+        }
+
+        return vazio;
+    }
+
+    public int numeroItens() {
+        int cont = 0;
+
+        for (Produto k : pedido.keySet()) {
+            cont += pedido.get(k);
+        }
+
+        return cont;
+    }
+
 }
