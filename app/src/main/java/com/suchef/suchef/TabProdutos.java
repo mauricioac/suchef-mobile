@@ -2,6 +2,10 @@ package com.suchef.suchef;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
@@ -13,6 +17,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -68,19 +74,31 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
 
             }
             private void showPopup() {
+                Rect displayRectangle = new Rect();
+                Window window = getActivity().getWindow();
+                window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
+
                 try {
-// We need to get the instance of the LayoutInflater
-                    //LayoutInflater inflater = (LayoutInflater) TabProdutos.this
                     v.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     View layout = il.inflate(R.layout.popup,
                             (ViewGroup) v.findViewById(R.id.popup_1));
-                    pw = new PopupWindow(layout, 900, 970, true);
+                    pw = new PopupWindow(layout, (int)(displayRectangle.width() * 0.9f), 870, true);
                     pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
-                    //Close = (Button) layout.findViewById(R.id.close_popup);
-                    //Close.setOnClickListener(cancel_button);
+                    pw.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+                    pw.setElevation(10);
+
+                    View container = (View) pw.getContentView().getParent();
+                    Context context = pw.getContentView().getContext();
+                    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                    WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+                    p.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+                    p.dimAmount = 0.3f;
+                    wm.updateViewLayout(container, p);
+
+
                     float total = pedido.subtotal();
                     TextView txtTotal = (TextView) layout.findViewById(R.id.txtTotal);
-                    txtTotal.setText("R$ " + String.valueOf(total));
+                    txtTotal.setText("R$ " + String.format("%.2f", total));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
