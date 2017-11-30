@@ -8,6 +8,8 @@ import android.support.annotation.LayoutRes;
 import android.app.FragmentManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.text.Layout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -24,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TabProdutos extends Fragment implements QuantidadeObserver {
+public class TabProdutos extends Fragment implements QuantidadeObserver{
 
     FloatingActionButton fab;
     ListView listaProdutos;
@@ -43,7 +46,9 @@ public class TabProdutos extends Fragment implements QuantidadeObserver {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.tab_produtos, container, false);
+        final View v = inflater.inflate(R.layout.tab_produtos, container, false);
+
+        final LayoutInflater il = inflater;
 
         listaProdutos = (ListView) v.findViewById(R.id.listaProdutos);
 
@@ -52,6 +57,33 @@ public class TabProdutos extends Fragment implements QuantidadeObserver {
 
         fab = (FloatingActionButton) v.findViewById(R.id.cartFAB);
         fab.hide();
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            private PopupWindow pw;
+
+            @Override
+            public void onClick(View v) {
+                showPopup();
+
+
+            }
+            private void showPopup() {
+                try {
+// We need to get the instance of the LayoutInflater
+                    //LayoutInflater inflater = (LayoutInflater) TabProdutos.this
+                    v.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View layout = il.inflate(R.layout.popup,
+                            (ViewGroup) v.findViewById(R.id.popup_1));
+                    pw = new PopupWindow(layout, 900, 970, true);
+                    pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+                    //Close = (Button) layout.findViewById(R.id.close_popup);
+                    //Close.setOnClickListener(cancel_button);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
 
         fabCounter = (TextView) v.findViewById(R.id.fabCounter);
         fabCounter.setVisibility(View.INVISIBLE);
