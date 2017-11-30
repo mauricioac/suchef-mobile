@@ -1,6 +1,7 @@
 package com.suchef.suchef;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -28,6 +29,7 @@ import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +52,17 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
         super.onCreate(savedInstanceState);
     }
 
+    public void finalizaPedido() {
+        ProgressDialog pr = new ProgressDialog(this.getActivity());
+        pr.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pr.setMessage("Enviando pedido...");
+        pr.setIndeterminate(true);
+        pr.setCanceledOnTouchOutside(false);
+        pr.show();
+
+        //TODO: enviar pedido API
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.tab_produtos, container, false);
@@ -63,6 +76,17 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
 
         fab = (FloatingActionButton) v.findViewById(R.id.cartFAB);
         fab.hide();
+
+        Method _finaliza = null;
+        try {
+
+            _finaliza = this.getClass().getMethod("finalizaPedido");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        final Method finaliza = _finaliza;
+
+        final Object self = this;
 
         fab.setOnClickListener(new View.OnClickListener() {
             private PopupWindow pw;
@@ -99,6 +123,23 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
                     float total = pedido.subtotal();
                     TextView txtTotal = (TextView) layout.findViewById(R.id.txtTotal);
                     txtTotal.setText("R$ " + String.format("%.2f", total));
+
+                    Button finalizar = (Button) layout.findViewById(R.id.btnFinalizarPedido);
+
+                    finalizar.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            pw.dismiss();
+
+                            try {
+                                finaliza.invoke(self);
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
