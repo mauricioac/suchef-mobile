@@ -78,6 +78,9 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
                     pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
                     //Close = (Button) layout.findViewById(R.id.close_popup);
                     //Close.setOnClickListener(cancel_button);
+                    float total = pedido.subtotal();
+                    TextView txtTotal = (TextView) layout.findViewById(R.id.txtTotal);
+                    txtTotal.setText("R$ " + String.valueOf(total));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
