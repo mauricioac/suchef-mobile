@@ -1,5 +1,6 @@
 package com.suchef.suchef;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     ListView list;
     SharedPreferences sharedPref;
+    ProgressDialog progress;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +49,14 @@ public class MainActivity extends AppCompatActivity {
         String url = "https://suchef-web.herokuapp.com/api/restaurantes";
 
         String token = sharedPref.getString("token_api", "");
+
+        progress = new ProgressDialog(this); // this = YourActivity
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setMessage("Buscando lista de restaurantes....");
+        progress.setIndeterminate(true);
+        progress.setCanceledOnTouchOutside(false);
+
+        progress.show();
 
         JsonArrayRequest request = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
             @Override
@@ -83,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
                             new int[] { R.id.nome_restaurante });
 
                     list.setAdapter(adapter);
+
+                    progress.hide();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -94,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 System.out.println(error.getMessage());
                 error.printStackTrace();
+                progress.hide();
             }
         }) {
             @Override
@@ -103,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
                 return headers;
             }
         };
+
+        request.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 10, 1.0f));
+
         list.setClickable(true);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

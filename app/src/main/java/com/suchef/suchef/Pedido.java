@@ -1,5 +1,9 @@
 package com.suchef.suchef;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 /**
@@ -56,6 +60,29 @@ public class Pedido {
         }
 
         return cont;
+    }
+
+    public JSONObject toJson() {
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("subtotal", subtotal());
+
+            JSONArray produtos = new JSONArray();
+
+            for (Produto k : pedido.keySet()) {
+                JSONObject produto = new JSONObject();
+                produto.put("id", k.getId());
+                produto.put("quantidade", pedido.get(k));
+
+                produtos.put(produto);
+            }
+
+            payload.put("produtos", produtos);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return payload;
     }
 
 }

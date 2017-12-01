@@ -3,6 +3,8 @@ package com.suchef.suchef;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -28,6 +30,17 @@ import android.widget.NumberPicker;
 import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -53,14 +66,47 @@ public class TabProdutos extends Fragment implements QuantidadeObserver{
     }
 
     public void finalizaPedido() {
-        ProgressDialog pr = new ProgressDialog(this.getActivity());
+        final ProgressDialog pr = new ProgressDialog(this.getActivity());
         pr.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         pr.setMessage("Enviando pedido...");
         pr.setIndeterminate(true);
         pr.setCanceledOnTouchOutside(false);
         pr.show();
 
-        //TODO: enviar pedido API
+        JSONObject payload = pedido.toJson();
+
+        RequestQueue queue = Volley.newRequestQueue(getActivity().getApplicationContext());
+
+        final SharedPreferences sharedPref = getActivity().getSharedPreferences(this.getString(R.string.app_name), Context.MODE_PRIVATE);
+
+        String token = sharedPref.getString("token_api", "");
+
+        String url = "https://suchef-web.herokuapp.com/api/pedidos";
+
+        JsonObjectRequest request = new JsonObjectRequest(url, payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+            pr.hide();
+            Toast.makeText(getActivity().getApplicationContext(), "Pedido efetuado com sucesso!", Toast.LENGTH_LONG).show();
+
+            Intent intent = new Intent(getActivity().getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Erro ao criar pedido!", Toast.LENGTH_LONG);
+            toast.show();
+
+            pr.hide();
+            }
+        });
+
+        request.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 10, 1.0f));
+
+        queue.add(request);
     }
 
     @Override
